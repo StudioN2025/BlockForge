@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Block3D - Blockly</title>
+    <script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/ru.js"></script>
+    <script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+    
+    <style>
+        body { margin: 0; padding: 0; height: 100vh; overflow: hidden; background: #222; }
+        #blocklyDiv { height: 100%; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="blocklyDiv"></div>
+
+    <script src="custom_blocks.js"></script>
+
+    <script>
+        let workspace;
+
+        function initBlockly() {
+            workspace = Blockly.inject('blocklyDiv', {
+                toolbox: `
+                    <xml xmlns="https://developers.google.com/blockly/xml">
+                        <category name="Логика" colour="210">
+                            <block type="controls_if"></block>
+                            <block type="logic_compare"></block>
+                            <block type="logic_boolean"></block>
+                        </category>
+                        <category name="Циклы" colour="120">
+                            <block type="controls_whileUntil"></block>
+                            <block type="controls_for"></block>
+                        </category>
+                        <category name="Математика" colour="230">
+                            <block type="math_number"></block>
+                            <block type="math_arithmetic"></block>
+                        </category>
+                        <category name="Переменные" colour="330" custom="VARIABLE"></category>
+                        <category name="Игровые блоки" colour="60">
+                            <block type="game_update"></block>
+                            <block type="game_move"></block>
+                        </category>
+                    </xml>`,
+                zoom: { controls: true },
+                trashcan: true,
+                sounds: true
+            });
+
+            // При изменении блоков отправляем код в Python
+            workspace.addChangeListener(() => {
+                const code = pythonGenerator.workspaceToCode(workspace);
+                if (window.pythonBridge) {
+                    window.pythonBridge.onCodeChanged(code);
+                }
+            });
+        }
+
+        // Функция для получения кода из Python
+        function getGeneratedPythonCode() {
+            return pythonGenerator.workspaceToCode(workspace);
+        }
+
+        window.onload = initBlockly;
+    </script>
+</body>
+</html>
